@@ -13,7 +13,17 @@ interface LeadData {
   Source: string;
   Sold: number;
   LeadCost: number;
-  [key: string]: any;
+  // Add all other possible fields from your CSV
+  FirstName?: string;
+  LastName?: string;
+  Email?: string;
+  Phone?: string;
+  Address?: string;
+  City?: string;
+  State?: string;
+  ZipCode?: string;
+  Notes?: string;
+  Status?: string;
 }
 
 interface DispositionStat {

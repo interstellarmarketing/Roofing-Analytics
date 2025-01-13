@@ -546,6 +546,11 @@
   resolved "https://registry.npmjs.org/@types/json5/-/json5-0.0.29.tgz"
   integrity sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==
 
+"@types/lodash@^4.17.14":
+  version "4.17.14"
+  resolved "https://registry.npmjs.org/@types/lodash/-/lodash-4.17.14.tgz"
+  integrity sha512-jsxagdikDiDBeIRaPYtArcT8my4tN1og7MtMRquFT3XNA6axxyHDRUemqDz/taRDdOUn0GnGHRCuff4q48sW9A==
+
 "@types/node@*", "@types/node@^20":
   version "20.17.12"
   resolved "https://registry.npmjs.org/@types/node/-/node-20.17.12.tgz"

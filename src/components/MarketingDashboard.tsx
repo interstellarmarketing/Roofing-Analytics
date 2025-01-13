@@ -1,51 +1,20 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import React, { useState, useEffect, useCallback } from 'react';
+import { XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import Papa from 'papaparse';
 import _ from 'lodash';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Calendar, ChevronDown } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 
 const MarketingDashboard = () => {
   const [data, setData] = useState([]);
   const [dateRange, setDateRange] = useState('7'); // days
-  const [selectedDisposition, setSelectedDisposition] = useState('3 Hour NA');
   const [loading, setLoading] = useState(true);
   const [dispositionStats, setDispositionStats] = useState({});
   const [sourceStats, setSourceStats] = useState([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch('/All Vertical _ Database - Raw Data (1).csv');
-        const text = await response.text();
-        
-        Papa.parse(text, {
-          header: true,
-          dynamicTyping: true,
-          skipEmptyLines: true,
-          complete: (results) => {
-            const parsedData = results.data.map(row => ({
-              ...row,
-              LeadEntryDate: new Date(row.LeadEntryDate)
-            }));
-            
-            setData(parsedData);
-            processData(parsedData);
-            setLoading(false);
-          }
-        });
-      } catch (error) {
-        console.error('Error reading file:', error);
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const processData = (rawData) => {
+  const processData = useCallback((rawData) => {
     // Process disposition trends
     const now = new Date();
     const daysAgo = new Date(now.getTime() - (parseInt(dateRange) * 24 * 60 * 60 * 1000));
@@ -114,13 +83,43 @@ const MarketingDashboard = () => {
       .value();
 
     setSourceStats(sourcePerformance);
-  };
+  }, [dateRange]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/All Vertical _ Database - Raw Data (1).csv');
+        const text = await response.text();
+        
+        Papa.parse(text, {
+          header: true,
+          dynamicTyping: true,
+          skipEmptyLines: true,
+          complete: (results) => {
+            const parsedData = results.data.map(row => ({
+              ...row,
+              LeadEntryDate: new Date(row.LeadEntryDate)
+            }));
+            
+            setData(parsedData);
+            processData(parsedData);
+            setLoading(false);
+          }
+        });
+      } catch (error) {
+        console.error('Error reading file:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [processData]);
 
   useEffect(() => {
     if (data.length > 0) {
       processData(data);
     }
-  }, [dateRange, data]);
+  }, [dateRange, data, processData]);
 
   if (loading) {
     return <div className="flex items-center justify-center h-96">Loading...</div>;

@@ -7,8 +7,9 @@ import _ from 'lodash';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Calendar } from 'lucide-react';
 
-interface LeadData {
-  LeadEntryDate: Date;
+// Raw data from CSV before date conversion
+interface RawLeadData {
+  LeadEntryDate: string;
   CallDisposition: string;
   Source: string;
   Sold: number;
@@ -23,6 +24,11 @@ interface LeadData {
   ZipCode?: string;
   Notes?: string;
   Status?: string;
+  [key: string]: string | number | undefined;
+}
+
+interface LeadData extends Omit<RawLeadData, 'LeadEntryDate'> {
+  LeadEntryDate: Date;
 }
 
 interface DispositionStat {
@@ -142,7 +148,7 @@ const MarketingDashboard = () => {
         const response = await fetch('/All Vertical _ Database - Raw Data (1).csv');
         const text = await response.text();
         
-        Papa.parse(text, {
+        Papa.parse<RawLeadData>(text, {
           header: true,
           dynamicTyping: true,
           skipEmptyLines: true,

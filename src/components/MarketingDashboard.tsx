@@ -13,7 +13,6 @@ interface LeadData {
   Source: string;
   Sold: number;
   LeadCost: number;
-  // Add all other possible fields from your CSV
   FirstName?: string;
   LastName?: string;
   Email?: string;
@@ -45,6 +44,16 @@ interface SourceStat {
   averageCost: string;
 }
 
+interface DispositionTrendStat {
+  disposition: string;
+  count: number;
+  percentage: number;
+}
+
+interface DispositionTrend extends DispositionStat {
+  disposition: string;
+}
+
 const MarketingDashboard = () => {
   const [data, setData] = useState<LeadData[]>([]);
   const [dateRange, setDateRange] = useState('7'); // days
@@ -64,7 +73,7 @@ const MarketingDashboard = () => {
     );
 
     // Calculate disposition stats
-    const calculateDispositionStats = (data: LeadData[]) => {
+    const calculateDispositionStats = (data: LeadData[]): DispositionTrendStat[] => {
       const total = data.length;
       return _.chain(data)
         .groupBy('CallDisposition')
@@ -167,7 +176,7 @@ const MarketingDashboard = () => {
     return <div className="flex items-center justify-center h-96">Loading...</div>;
   }
 
-  const dispositionTrends = Object.entries(dispositionStats).map(([disposition, stats]) => ({
+  const dispositionTrends: DispositionTrend[] = Object.entries(dispositionStats).map(([disposition, stats]) => ({
     disposition,
     ...stats
   }));

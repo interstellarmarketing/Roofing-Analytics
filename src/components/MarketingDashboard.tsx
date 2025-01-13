@@ -7,14 +7,42 @@ import _ from 'lodash';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Calendar } from 'lucide-react';
 
+interface LeadData {
+  LeadEntryDate: Date;
+  CallDisposition: string;
+  Source: string;
+  Sold: number;
+  LeadCost: number;
+  [key: string]: any;
+}
+
+interface DispositionStat {
+  current: string;
+  currentCount: number;
+  previous: string;
+  previousCount: number;
+  change: string;
+}
+
+interface DispositionStats {
+  [key: string]: DispositionStat;
+}
+
+interface SourceStat {
+  source: string;
+  count: number;
+  conversionRate: string;
+  averageCost: string;
+}
+
 const MarketingDashboard = () => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<LeadData[]>([]);
   const [dateRange, setDateRange] = useState('7'); // days
   const [loading, setLoading] = useState(true);
-  const [dispositionStats, setDispositionStats] = useState({});
-  const [sourceStats, setSourceStats] = useState([]);
+  const [dispositionStats, setDispositionStats] = useState<DispositionStats>({});
+  const [sourceStats, setSourceStats] = useState<SourceStat[]>([]);
 
-  const processData = useCallback((rawData) => {
+  const processData = useCallback((rawData: LeadData[]) => {
     // Process disposition trends
     const now = new Date();
     const daysAgo = new Date(now.getTime() - (parseInt(dateRange) * 24 * 60 * 60 * 1000));
@@ -26,7 +54,7 @@ const MarketingDashboard = () => {
     );
 
     // Calculate disposition stats
-    const calculateDispositionStats = (data) => {
+    const calculateDispositionStats = (data: LeadData[]) => {
       const total = data.length;
       return _.chain(data)
         .groupBy('CallDisposition')
@@ -42,31 +70,35 @@ const MarketingDashboard = () => {
     const olderStats = calculateDispositionStats(olderData);
 
     // Combine stats
-    const changes = {};
+    const changes: DispositionStats = {};
     [...recentStats, ...olderStats].forEach(stat => {
       const disposition = stat.disposition;
       if (!changes[disposition]) {
         changes[disposition] = {
-          current: 0,
+          current: '0',
           currentCount: 0,
-          previous: 0,
+          previous: '0',
           previousCount: 0,
-          change: 0
+          change: '0'
         };
       }
     });
 
     recentStats.forEach(stat => {
-      changes[stat.disposition].current = stat.percentage.toFixed(1);
-      changes[stat.disposition].currentCount = stat.count;
+      if (changes[stat.disposition]) {
+        changes[stat.disposition].current = stat.percentage.toFixed(1);
+        changes[stat.disposition].currentCount = stat.count;
+      }
     });
 
     olderStats.forEach(stat => {
-      changes[stat.disposition].previous = stat.percentage.toFixed(1);
-      changes[stat.disposition].previousCount = stat.count;
-      changes[stat.disposition].change = (
-        (parseFloat(changes[stat.disposition].current) - stat.percentage) || 0
-      ).toFixed(1);
+      if (changes[stat.disposition]) {
+        changes[stat.disposition].previous = stat.percentage.toFixed(1);
+        changes[stat.disposition].previousCount = stat.count;
+        changes[stat.disposition].change = (
+          (parseFloat(changes[stat.disposition].current) - stat.percentage) || 0
+        ).toFixed(1);
+      }
     });
 
     setDispositionStats(changes);
@@ -99,7 +131,7 @@ const MarketingDashboard = () => {
             const parsedData = results.data.map(row => ({
               ...row,
               LeadEntryDate: new Date(row.LeadEntryDate)
-            }));
+            })) as LeadData[];
             
             setData(parsedData);
             processData(parsedData);
